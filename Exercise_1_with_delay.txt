@@ -1,0 +1,32 @@
+int sensorPin = A0;   // Pin dla potencjometru
+int ledPin = 7;       // Pin dla LED
+//int buttonStateFrequency = 8; // Pin dla przycisku częstotliwości (nie użyto)
+//int buttonStateBrightness = 9; // Pin dla przycisku jasności (nie użyto)
+int sensorValue = 0;    //zmienna przechowująca wartość (aktualny stan) potencjometru
+                        //bazowo zero
+unsigned long currentTime = 0; //aktualny czas (startujemy od zera)
+int delayTime = 500; // Czas migania LED (czas opóźnienia świecenia)
+bool ledState = false; // Stan LED
+
+void setup() 
+{
+  pinMode(ledPin, OUTPUT);  //konfigutacja jako wyjście 
+ // pinMode(buttonStateFrequency, INPUT_PULLUP);    // Przyciski jako wejścia
+ // pinMode(buttonStateBrightness, INPUT_PULLUP);   //nie użyto
+  Serial.begin(9600); // Inicjalizacja portu szeregowego
+}
+
+void loop() 
+{
+  // Odczyt wartości z potencjometru dla migania
+  sensorValue = analogRead(sensorPin);  //przypisanie wartości z odczytu wejścia analogowego
+  delayTime = sensorValue; // Mapowanie do zakresu 100 ms do 1000 ms
+
+  // Miganie LED na podstawie opóźnienia
+  if (millis() - currentTime > delayTime) {
+    currentTime = millis(); //przypisanie aktualnie mierzonego czasu (ms)
+    ledState = !ledState; // Zmiana stanu LED
+    digitalWrite(ledPin, ledState); //przypisanie stanu na wyjście
+    Serial.println(delayTime); // Wyświetlenie opóźnienia w porcie szeregowym
+  }
+}

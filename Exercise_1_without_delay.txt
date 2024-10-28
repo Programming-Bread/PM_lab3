@@ -1,0 +1,34 @@
+int sensorPin = A0;   // wybór Pinu dla potencjometru
+int ledPin = 5;       // wybór Pinu dla LEDu
+int sensorValue = 0;
+
+int ledCtrl=255;      //ile różnych poziomów świecenia będziemy mieli
+// adnotacja: (wynika z rozdzielczości PWM)
+
+//int button_state_frequency = 8;  // (nie użyte)
+//int button_state_brightness = 9; // (nie użyte)
+
+
+unsigned long currentTime , delayTime = 500;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);  //deklaracja wyjścia
+  Serial.begin(4800);       // Inicjalizacja portu szeregowego
+  currentTime = millis();   //przypisanie aktualnie mierzonego czasu (ms)
+}
+
+void loop()
+{
+    if ((millis() - currentTime) > delayTime)
+    {
+        currentTime = millis();     // Aktualizacja czasu
+        delayTime= analogRead(sensorPin);   //odczytanie i przypisanie wartości z potencjometru
+        if(ledCtrl == 255)      //zapętlenie cyklu przy osiągnięciu max rozdzielczości 
+        {
+            ledCtrl = 0;
+        }
+        analogWrite(ledPin, ledCtrl);   
+        Serial.println(delayTime);  // Wyświetlenie opóźnienia w porcie szeregowym
+}
+}
+

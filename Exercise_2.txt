@@ -1,0 +1,29 @@
+int led = 6;           // Pin PWM, do którego podłączony zostanie LED
+#define Pot_pin A0 ;   // Określenie pinu (analogowego) dla potencjometru
+int brightness = 0;    // Początkowa wartość jasności
+int fadeAmount = 5;    // O ile zwiększana będzie jasność w pojedyńczym kroku
+int delayTime = 25;    // Czas opóźnienia
+unsigned long previousMillis = 0; // Czas ostatniej zmiany
+
+void setup() {
+  pinMode(led, OUTPUT); // Ustawienie LED jako wyjście
+  pinMode(Pot_pin, INPUT); // Ustawienie potencjometru jako wejście
+}
+
+void loop() {
+  int potValue = analogRead(Pot_pin); // Odczyt potencjometru
+  delayTime = map(potValue, 0, 1023, 10, 100); // Przeskalowanie wartości na opóźnienie (10-100 ms)
+
+  unsigned long currentMillis = millis(); // Aktualny czas
+
+  if (currentMillis - previousMillis >= delayTime) { // Sprawdzenie, czy minął czas opóźnienia
+    previousMillis = currentMillis; // Aktualizacja czasu
+    analogWrite(led, brightness); // Ustawienie jasności LED
+    brightness += fadeAmount; // Zmiana jasności
+
+    if (brightness <= 0 || brightness >= 255) { // Zmiana kierunku, gdy osiągniemy skrajność
+      fadeAmount = -fadeAmount; // Odwrócenie kierunku zmian
+    }
+  }
+  Serial.println(potValue); //na port szeregowy
+}

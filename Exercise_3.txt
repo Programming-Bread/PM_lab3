@@ -1,0 +1,86 @@
+*/
+zad.3 napisz program który w trybie pierwszym zmienia częstotliwość mrugania diody
+w zależności od ustawienia potencjometru a w trybie 2 działania zmienia jasność 
+diody w zależności od ustawienia potencjometru. Tryby pracy powinny być zmieniane przez
+naciśnięcie wybranego przycisku i wyświetlane jednocześnie w trybie portu szeregowego.
+*/
+
+int sensorPin = A0;   // wybór Pinu dla potencjometru
+int ledPin = 5;       // wybór Pinu dla LEDu
+int sensorValue = 0;
+int ledCtrl=255;      //ile różnych poziomów świecenia będziemy mieli
+// adnotacja: (wynika z rozdzielczości PWM)
+
+int tryb1 = 8;         //wybór pinu dla przycisku pierwszego (pin 8)
+int tryb2 = 9;         //wybór pinu dla przycisku pierwszego (pin 9)
+
+int co_tam_w_potencjometrze_piszczy; //potencjometr stan
+int buzie_widze;;                    //przechowuje wartość PWM po zmieleniu z potencjometru
+//przycisk 1 --> tryb zmiany częstotliwości
+//przycisk 2 --> tryb zmiany jasności
+
+int buttonStateFrequency = 0;   //zmienna która przechowuje stan przycisku 1 
+int buttonStateBrightness = 0;  //zmienna która przechowuje stan przycisku 2
+
+unsigned long currentTime , delayTime = 500;
+
+
+
+void setup() 
+{
+  pinMode(A0, INPUT);
+  pinMode(ledPin, OUTPUT);  //deklaracja wyjścia
+  Serial.begin(4800);       // Inicjalizacja portu szeregowego
+  currentTime = millis();   //przypisanie aktualnie mierzonego czasu (ms)
+
+  pinMode(tryb1, INPUT);    //przycisk 1 jako wejście 
+  pinMode(tryb2, INPUT);    //przycisk 2 jako wejście 
+  Serial.begin(6900); 
+}
+
+void loop()
+{
+if (digitalRead(tryb1) == HIGH)     //inicjalizacja trybu zmiany częstotliwości
+{       
+    buttonStateFrequency = 1;          // odpowiednie przypisanie wartości 0-1
+    buttonStateBrightness = 0;         // w celu poprawnego wywołania odpowiednich działań
+    Serial.println("Tryb zmiany częstotliwości");  // Print to Serial Monitor
+}
+
+if (digitalRead(tryb2) == HIGH)     //inicjalizacja trybu zmiany jasności 
+{      
+    buttonStateFrequency = 0;          // odpowiednie przypisanie wartości 0-1
+    buttonStateBrightness = 1;         // w celu poprawnego wywołania odpowiednich działań
+    Serial.println("Tryb zmiany jasności");  // Print to Serial Monitor
+}
+
+if (buttonStateFrequency == 1 && buttonStateBrightness == 1)
+{       
+    buttonStateFrequency = 0;          //przeciwdziałanie kraksie
+    buttonStateBrightness = 0;
+    Serial.println("Tryb error - ustaw jeden tryb");  // Print to Serial Monitor
+}
+
+if (buttonStateFrequency == 1 && buttonStateBrightness == 0)
+{
+    if ((millis() - currentTime) > delayTime)
+    {
+        currentTime = millis();     // Aktualizacja czasu
+        delayTime= analogRead(sensorPin);   //odczytanie i przypisanie wartości z potencjometru
+        if(ledCtrl == 255)      //zapętlenie cyklu przy osiągnięciu max rozdzielczości 
+        {
+            ledCtrl = 0;
+        }
+        analogWrite(ledPin, ledCtrl);   
+        Serial.println(delayTime);  // Wyświetlenie opóźnienia w porcie szeregowym
+    }
+}
+
+if (buttonStateFrequency == 0 && buttonStateBrightness == 1)
+{
+    co_tam_w_potencjometrze_piszczy= analogRead(A0);   //odczytanie i przypisanie wartości z potencjometru
+    buzie_widze = map(co_tam_w_potencjometrze_piszczy,0, 1023, 0, 255); //convertio potencjometr --> PWM
+    analogWrite(ledPin, buzie_widze);   //przypisanie jasności świecenia do diody
+}
+
+}
